@@ -10,7 +10,7 @@ REGION=$1
 
 SAM_BUCKET=$(aws cloudformation describe-stack-resources \
     --region ${REGION} \
-    --stack-name sam-bootstrap \
+    --stack-name sam-artifacts \
     --query 'StackResources[?LogicalResourceId==`Bucket`].PhysicalResourceId' \
     --output text)
 

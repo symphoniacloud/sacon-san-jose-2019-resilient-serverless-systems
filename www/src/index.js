@@ -8,7 +8,7 @@ const app = Elm.Main.init({ flags: [] });
 var webSocket;
 
 function connect() {
-    let ws = new WebSocket('wss://api-ws.qcon.symphonia.io');
+    let ws = new WebSocket('wss://api-ws.sacon.symphonia.io');
     ws.onopen = wsOnOpen;
     ws.onclose = wsOnClose;
     ws.onerror = wsOnError;
@@ -34,7 +34,7 @@ function wsOnMessage(event) {
 }
 
 function send(i, message) {
-    if (webSocket.readyState == WebSocket.OPEN) {
+    if (webSocket.readyState === WebSocket.OPEN) {
         webSocket.send(JSON.stringify(message));
     } else if (i < 2) {
         webSocket = connect();

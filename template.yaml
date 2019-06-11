@@ -8,22 +8,22 @@ Parameters:
     Type: AWS::Route53::HostedZone::Id
     # e.g., "Z45J1D2QQ43H93", from the Route 53 hosted zone that will contain
     #   the domain names below.
-    Default: ZJ3XHEOZ3EIRV
+    Default:  Z2S9JUE6PMAH1N
 
   CertificateDomainName:
     Type: String
-    Default: "*.qcon.symphonia.io"
+    Default: "*.sacon.symphonia.io"
 
   RestDomainName:
     Type: String
-    Default: "api.qcon.symphonia.io"
+    Default: "api.sacon.symphonia.io"
 
   # # Setting custom domain names on WebSocket APIs isn't
   # #  yet supported by CloudFormation, so this is all
   # #  done manually.
   # WebSocketDomainName:
   #   Type: String
-  #   Default: "api-ws.qcon.symphonia.io"
+  #   Default: "api-ws.sacon.symphonia.io"
 
   ValidationDomain:
     Type: String
