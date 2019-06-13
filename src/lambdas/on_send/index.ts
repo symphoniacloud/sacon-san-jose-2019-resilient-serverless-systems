@@ -6,6 +6,11 @@ if (!process.env.MESSAGES_TABLE) {
 }
 const MESSAGES_TABLE = process.env.MESSAGES_TABLE;
 
+if (!process.env.REGION) {
+    throw new Error('Environment variables "REGION" must be set.');
+}
+const REGION = process.env.REGION;
+
 const documentClient = new DocumentClient();
 
 export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
@@ -22,7 +27,8 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
                 ts: new Date().getTime(),
                 type: 'message',
                 message: message,
-                source: event.requestContext.connectionId
+                source: event.requestContext.connectionId,
+                sourceRegion: REGION
             }
         };
         console.log(`params: ${JSON.stringify(params)}`)

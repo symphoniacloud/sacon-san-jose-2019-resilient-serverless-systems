@@ -18,12 +18,13 @@ type alias Message =
     , region : String
     , message : String
     , timestamp : Int
+    , sourceRegion : String
     }
 
 
 toMessage : SocketMessage -> Message
 toMessage sm =
-    Message sm.id sm.region sm.message (String.toInt sm.timestamp |> Maybe.withDefault 0)
+    Message sm.id sm.region sm.message (String.toInt sm.timestamp |> Maybe.withDefault 0) sm.sourceRegion
 
 
 type alias SocketMessage =
@@ -31,6 +32,7 @@ type alias SocketMessage =
     , region : String
     , message : String
     , timestamp : String
+    , sourceRegion : String
     }
 
 
@@ -115,11 +117,12 @@ historyDecoder =
 
 historyMessageDecoder : Json.Decode.Decoder Message
 historyMessageDecoder =
-    Json.Decode.map4 Message
+    Json.Decode.map5 Message
         (Json.Decode.field "id" Json.Decode.string)
         (Json.Decode.field "region" Json.Decode.string)
         (Json.Decode.field "message" Json.Decode.string)
         (Json.Decode.field "ts" Json.Decode.int)
+        (Json.Decode.field "sourceRegion" Json.Decode.string)
 
 
 socketDecoder : Json.Decode.Decoder (List SocketMessage)
@@ -129,11 +132,12 @@ socketDecoder =
 
 socketMessageDecoder : Json.Decode.Decoder SocketMessage
 socketMessageDecoder =
-    Json.Decode.map4 SocketMessage
+    Json.Decode.map5 SocketMessage
         (Json.Decode.field "id" Json.Decode.string)
         (Json.Decode.field "region" Json.Decode.string)
         (Json.Decode.field "message" Json.Decode.string)
         (Json.Decode.field "ts" Json.Decode.string)
+        (Json.Decode.field "sourceRegion" Json.Decode.string)
 
 
 messageEncoder : String -> Json.Encode.Value
@@ -154,11 +158,13 @@ jumpToBottom id =
 view : Model -> Html Msg
 view model =
     div [ class "container" ]
-        [ p [] [ text "Welcome to Quack!" ]
-
-        -- , p [] [ text (Maybe.withDefault "none" model.error) ]
-        , div [ class "pure-g" ]
-            [ div [ id "content", class "pure-u content" ]
+        [ div [ class "pure-g" ]
+            [ div [ class "pure-u pure-u-1" ]
+                [ div [ class "pure-u pure-u-2-3" ] [ b [ ] [ text "Message" ] ]
+                , div [ class "pure-u pure-u-1-6" ] [ b [ ] [ text "Source" ] ]
+                , div [ class "pure-u pure-u-1-6" ] [ b [ ] [ text "Read" ] ]
+                ]
+            , div [ id "content", class "pure-u content" ]
                 (List.sortBy .timestamp model.messages |> List.map viewMessage)
             , div [ class "pure-u pure-u-1 controls" ]
                 [ Html.form [ class "pure-form pure-u-1", onSubmit SendMessage ]
@@ -171,7 +177,11 @@ view model =
 
 viewMessage : Message -> Html Msg
 viewMessage message =
-    p [ class "message" ] [ text (message.region ++ " | " ++ message.message) ]
+    div [ ]
+        [ div [ class "pure-u pure-u-2-3" ] [ p [ class "message" ] [ text message.message ] ]
+        , div [ class "pure-u pure-u-1-6" ] [ p [ class "message" ] [ text message.sourceRegion ] ]
+        , div [ class "pure-u pure-u-1-6" ] [ p [ class "message" ] [ text message.region ] ]
+        ]
 
 
 
@@ -197,7 +207,7 @@ main =
         { init = \_ -> init
         , view =
             \m ->
-                { title = "Quack"
+                { title = ""
                 , body = [ view m ]
                 }
         , update = update

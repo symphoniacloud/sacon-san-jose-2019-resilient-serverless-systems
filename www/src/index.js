@@ -2,8 +2,8 @@
 
 require("./styles.scss");
 
-const { Elm } = require('./Main');
-const app = Elm.Main.init({ flags: [] });
+const {Elm} = require('./Main');
+const app = Elm.Main.init({flags: []});
 
 var webSocket;
 
@@ -24,8 +24,14 @@ function wsOnClose() {
     console.log('disconnected');
 }
 
-function wsOnError() {
+function wsOnError(err) {
     console.log('error: ' + JSON.stringify(err));
+    // Attempt to reconnect
+    new Promise(resolve => setTimeout(resolve, 1000))
+        .then(() => {
+            console.log('attempting to reconnect');
+            webSocket = connect();
+        });
 }
 
 function wsOnMessage(event) {

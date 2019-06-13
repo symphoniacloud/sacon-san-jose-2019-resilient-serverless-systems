@@ -21,34 +21,13 @@ Parameters:
   # # Setting custom domain names on WebSocket APIs isn't
   # #  yet supported by CloudFormation, so this is all
   # #  done manually.
-  # WebSocketDomainName:
-  #   Type: String
-  #   Default: "api-ws.sacon.symphonia.io"
+  WebSocketDomainName:
+    Type: String
+    Default: "api-ws.sacon.symphonia.io"
 
   ValidationDomain:
     Type: String
     Default: "symphonia.io"
-
-Mappings:
-
-  # https://docs.aws.amazon.com/general/latest/gr/rande.html#apigateway_region
-  RegionMap:
-    us-east-1:
-      HostedZoneId: Z1UJRXOUMOOFQ8
-    us-east-2:
-      HostedZoneId: ZOJJZC49E0EPZ
-    us-west-1:
-      HostedZoneId: Z2MUQ32089INYE
-    us-west-2:
-      HostedZoneId: Z2OJLYMUO9EFXC
-    eu-central-1:
-      HostedZoneId: Z1U9ULNL0V5AJ3
-    eu-west-1:
-      HostedZoneId: ZLY8HYME6SFDD
-    eu-west-2:
-      HostedZoneId: ZJ5UAJN8Y3Z2Q
-    eu-west-3:
-      HostedZoneId: Z3KY65QIEKYHQQ
 
 Globals:
 
@@ -331,6 +310,22 @@ Resources:
       RestApiId: !Ref RestApi
       Stage: Prod
 
+  WebSocketCustomDomain:
+    Type: AWS::ApiGatewayV2::DomainName
+    Properties:
+      DomainName: !Ref WebSocketDomainName
+      DomainNameConfigurations:
+        - EndpointType: REGIONAL
+          CertificateArn: !Ref Certificate
+          CertificateName: !Sub "${AWS::Region} cert"
+
+  WebSocketApiMapping:
+    Type: AWS::ApiGatewayV2::ApiMapping
+    Properties:
+      ApiId: !Ref WebSocketApi
+      DomainName: !Ref WebSocketCustomDomain
+      Stage: !Ref WebSocketStage
+
   WebSocketDeployment:
     Type: AWS::ApiGatewayV2::Deployment
     DependsOn:
@@ -355,17 +350,32 @@ Resources:
         RequestInterval: 10
         ResourcePath: /Prod/health
         Type: HTTPS
+      HealthCheckTags:
+        - Key: Name
+          Value: !Sub "${AWS::StackName}-${AWS::Region}"
 
-  DnsRecord:
+  RestDnsRecord:
     Type: AWS::Route53::RecordSet
     Properties:
       AliasTarget:
         DNSName: !GetAtt RestCustomDomain.RegionalDomainName
-        EvaluateTargetHealth: false
-        HostedZoneId: !FindInMap [RegionMap, !Ref "AWS::Region", HostedZoneId]
+        HostedZoneId: !GetAtt RestCustomDomain.RegionalHostedZoneId
+      HealthCheckId: !Ref HealthCheck
       HostedZoneId: !Ref HostedZoneId
-      Name: !Sub "${RestDomainName}."
-      Region: !Sub "${AWS::Region}"
+      Name: !Ref RestDomainName
+      Region: !Ref AWS::Region
       SetIdentifier: !Sub "${AWS::Region} API"
       Type: A
-      HealthCheckId: !Ref HealthCheck
+
+#  WebSocketDnsRecord:
+#    Type: AWS::Route53::RecordSet
+#    Properties:
+#      HealthCheckId: !Ref HealthCheck
+#      HostedZoneId: !Ref HostedZoneId
+#      Name: !Ref WebSocketDomainName
+#      Region: !Ref AWS::Region
+#      SetIdentifier: !Sub "${AWS::Region} WS-API"
+#      Type: A
+#      AliasTarget:
+#        DNSName: !GetAtt WebSocketCustomDomain.RegionalDomainName
+#        HostedZoneId: !GetAtt WebSocketCustomDomain.RegionalHostedZoneId

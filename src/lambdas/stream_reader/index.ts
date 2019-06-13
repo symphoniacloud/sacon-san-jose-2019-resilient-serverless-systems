@@ -43,12 +43,14 @@ export async function handler(event: DynamoDBStreamEvent): Promise<void> {
         let ts = (((record.dynamodb || {}).NewImage || {}).ts || {}).N;
         let message = (((record.dynamodb || {}).NewImage || {}).message || {}).S;
         let source = (((record.dynamodb || {}).NewImage || {}).source || {}).S;
+        let sourceRegion = (((record.dynamodb || {}).NewImage || {}).sourceRegion || {}).S;
 
         return {
             id: id,
             ts: ts,
             message: message,
             source: source,
+            sourceRegion: sourceRegion,
             region: REGION
         };
     });
