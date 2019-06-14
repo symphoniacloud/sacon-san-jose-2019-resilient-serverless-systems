@@ -8,9 +8,19 @@ Before deploying:
 1. Change all code references from "api.sacon.symphonia.io" or "api-ws.sacon.symphonia.io" to match your domain name.
 1. Change the HostedZoneId in `template.yaml` to refer to your hosted zone.
 
-To deploy, run `./bin/deploy.bash <region>` across one or more AWS regions.
+To deploy the backend, run `./bin/deploy.bash <region>` across one or more AWS regions.
 
 After deploying:
 
 1. Manually configure DynamoDB Global Tables via the AWS web console.
 2. Manually add ALIAS records to the Route 53 hosted zone for each region, for the WebSocket API. The Route 53 alias target value should be the "Target Domain Name" from the appropriate entry in the API Gateway console's "Custom Domain Names" section. Same for the "Alias Hosted Zone ID" value.
+
+To run the frontend:
+
+```
+$ cd www
+$ npm install
+$ npm run dev
+```
+
+Navigate to http://localhost:3000
